@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>TV Launcher</title>
+<style>
+:root{--ease:cubic-bezier(.22,1,.36,1);--ink:#f4f6fb;--dim:rgba(244,246,251,.58);--panel:rgba(255,255,255,.085)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#07090f;color:var(--ink);
+  font-family:Roboto,"Segoe UI",system-ui,sans-serif;cursor:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+button{all:unset;box-sizing:border-box;cursor:pointer}
+
+/* ambient glow: tint follows the focused app */
+.glow{position:fixed;inset:0;z-index:-1;background-color:#2a4fd6;opacity:.5;transition:background-color .9s ease;
+  -webkit-mask-image:radial-gradient(ellipse 80% 65% at 12% 0%,#000,transparent 75%);
+  mask-image:radial-gradient(ellipse 80% 65% at 12% 0%,#000,transparent 75%)}
+
+.shell{height:100%;display:flex;flex-direction:column;padding:0 0 3.5vh}
+
+/* ── Tabs / Navbar ── */
+.top{position:absolute;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:4vh 4.5vw 0}
+.tabs{display:flex;gap:.4vw;padding:.5vh .5vw;border-radius:99px;background:rgba(255,255,255,.1);
+  -webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px)}
+.tab{padding:1.2vh 2.4vw;border-radius:99px;font-size:clamp(1rem,2.3vmin,1.45rem);font-weight:500;color:var(--dim);
+  transition:background .2s,color .2s,transform .2s var(--ease)}
+.tab.on{background:rgba(255,255,255,.18);color:var(--ink)}
+.tab:focus{outline:none;background:#fff;color:#0a0d14;transform:scale(1.07)}
+.lside,.stat{position:absolute;top:50%;transform:translateY(-50%);font-size:clamp(.95rem,2.2vmin,1.4rem)}
+.lside{left:4.5vw;color:var(--dim)}
+.stat{right:4.5vw;display:flex;align-items:center;gap:1.4vw}
+.badge{padding:.3vh .7vw;border-radius:.6vw;border:.2vmin solid rgba(255,255,255,.4);font-size:.75em;font-weight:600;letter-spacing:.04em}
+.badge:empty{display:none}
+.mini{font-weight:300;font-size:1.25em;font-variant-numeric:tabular-nums}
+
+.views{flex:1;min-height:0;position:relative}
+.view{position:absolute;inset:0;display:none;flex-direction:column;min-height:0}
+.view.on{display:flex}
+#v-home{overflow-y:auto;overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none}
+#v-home::-webkit-scrollbar{display:none}
+
+/* Push Apps and System down so they clear the floating navbar */
+#v-apps, #v-system { padding-top: 12vh; }
+
+/* ── Home ── */
+.chip{display:inline-block;padding:.5vh 1.1vw;border-radius:99px;background:rgba(255,255,255,.16);font-size:clamp(.8rem,1.8vmin,1.1rem);font-weight:500}
+.chip:empty{display:none}
+.sec{flex:none;padding:0 4.5vw;font-size:clamp(1rem,2.2vmin,1.4rem);font-weight:600;margin-top:1.5vh}
+.row,.rail{position:relative;display:flex;gap:1.6vw;overflow-x:hidden;padding:2.2vh 4.5vw;margin:0;flex:none}
+.rec{flex:0 0 15.5vw;height:4.9vw;display:flex;align-items:center;gap:1vw;padding:0 1.1vw;border-radius:1.2vw;background:var(--panel);
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease);will-change:transform}
+.rec .icon{width:3.4vw;height:3.4vw;border-radius:.8vw}
+.rec .label{font-size:clamp(.85rem,1.9vmin,1.2rem);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.fav{flex:0 0 17vw;height:9.8vw;border-radius:1.6vw;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6vh;
+  background:linear-gradient(150deg,var(--c1),var(--c2));box-shadow:0 1.2vh 3vh rgba(0,0,0,.35);
+  transition:transform .25s var(--ease),box-shadow .25s var(--ease);will-change:transform}
+.fav .icon{width:4.6vw;height:4.6vw;border-radius:1vw}
+.fav .label{font-size:clamp(.95rem,2.1vmin,1.35rem);font-weight:500}
+.hint{font-size:clamp(.8rem,1.7vmin,1.05rem);color:var(--dim);opacity:.8;padding-left:4.5vw;flex:none}
+.empty{flex:1;display:grid;place-items:center;border-radius:1.6vw;border:.2vmin dashed rgba(255,255,255,.25);height:9.8vw;color:var(--dim);font-size:clamp(1rem,2.2vmin,1.4rem);text-align:center;padding:0 4vw}
+
+/* ── Apps ── */
+.head{padding:3vh 4.5vw 0;flex:none}
+.head h1{font-size:clamp(1.6rem,4.2vmin,2.8rem);font-weight:500;letter-spacing:-.01em}
+.head p{margin-top:.6vh;color:var(--dim);font-size:clamp(.85rem,1.8vmin,1.1rem)}
+.grid{position:relative;flex:1;min-height:0;display:grid;grid-template-columns:repeat(6,1fr);align-content:start;gap:2vw;overflow-y:auto;
+  padding:3.4vh 4.5vw;margin:0;scrollbar-width:none}
+.grid::-webkit-scrollbar{display:none}
+.star{position:absolute;top:.4vh;right:.4vw;font-size:clamp(.9rem,2vmin,1.3rem);color:#ffd45e;z-index:11;pointer-events:none}
+.icon{display:grid;place-items:center;overflow:hidden;flex:none;font-size:clamp(1.4rem,3.4vmin,2.4rem);font-weight:600}
+.icon img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* ── System ── */
+.sys{display:grid;grid-template-columns:1fr 1fr;gap:2vw;padding:4vh 4.5vw}
+.card{padding:3vh 2vw;border-radius:1.4vw;background:var(--panel)}
+.card small{display:block;color:var(--dim);font-size:clamp(.8rem,1.7vmin,1.05rem);margin-bottom:1vh}
+.card div{display:flex;align-items:center;gap:.8vw;font-size:clamp(1.1rem,2.6vmin,1.7rem)}
+.dot{width:1.1vmin;height:1.1vmin;border-radius:50%;background:#34d399;box-shadow:0 0 1.2vmin rgba(52,211,153,.8);flex:none}
+.dot.off{background:#f87171;box-shadow:0 0 1.2vmin rgba(248,113,113,.8)}
+.dot.unk{background:#fbbf24;box-shadow:0 0 1.2vmin rgba(251,191,36,.7)}
+
+.toast{position:fixed;left:50%;bottom:6vh;transform:translate(-50%,2vh);padding:1.4vh 2.4vw;border-radius:99px;background:rgba(20,24,36,.92);
+  font-size:clamp(.95rem,2.1vmin,1.3rem);opacity:0;transition:opacity .25s,transform .25s var(--ease);pointer-events:none;z-index:1000}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ═══ Minimal, edge-to-edge app icons ═══════════════════════ */
+.icon{display:grid;place-items:center;flex:none;overflow:visible;background:transparent;border:0;box-shadow:none;border-radius:0}
+.icon img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 5px 14px rgba(0,0,0,.25))}
+
+.tile{position:relative;display:flex;flex-direction:column;align-items:center;padding:1.8vh .4vw;gap:0;background:transparent;border-radius:1.2vw;overflow:visible;
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease);will-change:transform}
+.tile .icon{width:5.8vw;height:5.8vw;max-width:104px;max-height:104px;transition:transform .22s cubic-bezier(.22,1,.36,1)}
+.tile .label{position:absolute;z-index:10;top:calc(100% + .7vh);left:50%;transform:translate(-50%,-4px);width:max-content;max-width:18vw;padding:.8vh 1.2vw;
+  border:1px solid rgba(255,255,255,.12);border-radius:.65vw;background:rgba(18,20,28,.96);color:#fff;font-size:clamp(.9rem,1.8vmin,1.15rem);
+  text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .16s ease,transform .16s ease}
+
+.tile:focus,.fav:focus,.rec:focus{outline:none;background:transparent;box-shadow:0 0 0 2px rgba(255,255,255,.9);transform:scale(1.06);z-index:5}
+.tile:focus .icon{transform:scale(1.06)}
+.tile:focus .label{opacity:1;visibility:visible;transform:translate(-50%,0)}
+
+.fav{flex:0 0 7vw;height:9vw;padding:0;gap:.8vh;background:transparent;box-shadow:none}
+.fav .icon{width:5.2vw;height:5.2vw}
+.fav .label{position:static;font-size:clamp(.8rem,1.6vmin,1rem);font-weight:500;max-width:7vw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  opacity:1;visibility:visible;transform:none;padding:0;border:0;background:transparent;text-align:center}
+@media (hover:hover){.tile:hover .label,.fav:hover .label{opacity:1;visibility:visible}}
+
+/* ═══ Cinematic movie hero ══════════════════════════════════ */
+.movie-hero{position:relative;flex:0 0 auto;height:80vh;min-height:80vh;margin:0 0 1.5vh;border-radius:0 0 1.2vw 1.2vw;overflow:hidden;isolation:isolate;display:flex;align-items:center;
+  background:#090b12}
+
+.hero-backdrop{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;opacity:0;transition:opacity .6s ease}
+.hero-backdrop.active{opacity:1}
+
+.movie-hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(5,7,12,.97) 0%,rgba(5,7,12,.84) 32%,rgba(5,7,12,.28) 72%,rgba(5,7,12,.10) 100%),
+    linear-gradient(0deg,rgba(5,7,12,.75),transparent 45%)}
+
+.movie-copy{position:relative;z-index:2;width:57%;padding:0 0 0 4.5vw;transition:opacity .4s ease, transform .4s ease}
+.movie-eyebrow{color:#f5c96b;font-size:clamp(.8rem,1.6vmin,1.05rem);letter-spacing:.18em;font-weight:700}
+.movie-copy h1{margin-top:1.8vh;font-size:clamp(2.5rem,6.8vmin,5.5rem);line-height:1.05;letter-spacing:-.035em;font-weight:650;max-width:100%;
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.movie-meta{margin-top:1.5vh;font-size:clamp(1rem,2vmin,1.3rem);color:rgba(255,255,255,.78)}
+.movie-copy p{margin-top:1.6vh;color:rgba(255,255,255,.72);font-size:clamp(.95rem,1.8vmin,1.15rem);line-height:1.6;max-width:90%;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+.hero-next{position:absolute;right:3vw;top:50%;transform:translateY(-50%);
+  width:clamp(40px, 3.5vw, 56px);height:clamp(40px, 3.5vw, 56px);
+  border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);
+  color:#fff;font-size:clamp(1.5rem, 2vw, 2.2rem);line-height:1;z-index:3;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  transition:transform .2s var(--ease),background .2s ease, color .2s ease}
+.hero-next:focus{outline:2px solid #fff;outline-offset:2px;background:#fff;color:#0a0d14;transform:translateY(-50%) scale(1.1)}
+
+.movie-credit{position:absolute;right:2vw;bottom:2vh;font-size:.75rem;letter-spacing:.16em;color:rgba(255,255,255,.55);z-index:2}
+</style>
+</head>
+<body data-view="home">
+<div class="glow" id="glow"></div>
+<div class="shell">
+  <nav class="top">
+    <div class="tabs" role="tablist">
+      <button class="tab on" data-v="home" role="tab">Home</button>
+      <button class="tab" data-v="apps" role="tab">Apps</button>
+      <button class="tab" data-v="system" role="tab">System</button>
+    </div>
+    <div class="lside" id="date"></div>
+    <div class="stat"><span id="wx"></span><span class="badge" id="res"></span><span class="mini" id="mini"></span></div>
+  </nav>
+
+  <div class="views">
+    <section class="view on" id="v-home">
+      <div class="movie-hero" id="movieHero" tabindex="0">
+        <!-- Background layers for crossfading -->
+        <div class="hero-backdrop" id="heroBg1"></div>
+        <div class="hero-backdrop" id="heroBg2"></div>
+        
+        <div class="movie-copy">
+          <div class="movie-eyebrow" id="movieEyebrow">TONIGHT'S PICK</div>
+          <h1 id="movieTitle">Discover something great</h1>
+          <div class="movie-meta" id="movieMeta">Personalized movie inspiration</div>
+          <p id="movieOverview">A new cinematic recommendation, every time you visit Home.</p>
+        </div>
+        <button class="movie-btn hero-next" id="nextMovie" aria-label="Next movie">&#8250;</button>
+        <div class="movie-credit">MOVIE SPOTLIGHT · OK PLAYS TRAILER</div>
+      </div>
+      <div class="sec">Pinned</div>
+      <div class="row hs" id="row"></div>
+      <div class="sec" id="secB">Recently opened</div>
+      <div class="rail hs" id="rail"></div>
+      <div class="hint" id="homeHint">OK opens an app. Hold OK to pin or unpin it.</div>
+    </section>
+
+    <section class="view" id="v-apps">
+      <div class="head"><h1>All apps</h1><p id="count"></p></div>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <section class="view" id="v-system">
+      <div class="head"><h1>System</h1></div>
+      <div class="sys">
+        <div class="card"><small>Network</small><div><span class="dot unk" id="dNet"></span><span id="tNet">Checking…</span></div></div>
+        <div class="card"><small>USB debugging (ADB)</small><div><span class="dot unk" id="dAdb"></span><span id="tAdb">Unknown</span></div></div>
+        <div class="card"><small>Default launcher</small><div><span class="dot unk" id="dMode"></span><span id="tMode">Unknown</span></div></div>
+        <div class="card"><small>Display</small><div><span class="dot" id="dTv"></span><span id="tTv"></span></div></div>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+var CONFIG = {
+  WEATHER_LOCATION: 'Malmo, Sweden',
+  WEATHER_UNITS: 'celsius',
+  WEATHER_REFRESH_MS: 600000,
+  FALLBACK_LAT: 55.6058, FALLBACK_LON: 13.0022,
+  DEFAULT_FAVORITES: [
+    { label: /^youtube$/i, pkg: /^com\.google\.android\.youtube\.tv$/ },
+    { label: /netflix/i,   pkg: /netflix/ },
+    { label: /hbo|^max$/i, pkg: /hbo|wbd/ }
+  ] , 
+    VIRTUAL_APPS: [
+    { 
+      label: 'WitAnime', 
+      packageName: 'url.witanime', 
+      url: 'https://witanime.site/' ,
+      icon: 'https://witanime.site/favicon.ico'
+}
+]
+};
+
+var $ = function(id){ return document.getElementById(id); };
+var apps = [], favs = [], view = 'home';
+
+function load(){ try{ return JSON.parse(localStorage.getItem('fav.v1')); }catch(e){ return null; } }
+function save(){ try{ localStorage.setItem('fav.v1', JSON.stringify(favs)); }catch(e){} }
+var recents = (function(){ try{ return JSON.parse(localStorage.getItem('recent.v1')) || {}; }catch(e){ return {}; } })();
+function recentList(){
+  return Object.keys(recents).sort(function(a, b){ return recents[b].t - recents[a].t; })
+    .map(function(id){ return byId(id); }).filter(Boolean).slice(0, 8);
+}
+
+var BRANDS = [
+  [/youtube/i, '#ff2a3d', '#6e0a16'],
+  [/netflix/i, '#e50914', '#1a0204'],
+  [/hbo|^max$/i, '#7b3ff2', '#170a40']
+];
+function colorsFor(a){
+  var s = (a.label || '') + ' ' + (a.packageName || '');
+  for (var i = 0; i < BRANDS.length; i++) if (BRANDS[i][0].test(s)) return [BRANDS[i][1], BRANDS[i][2]];
+  var h = 0; for (var j = 0; j < s.length; j++) h = (h * 31 + s.charCodeAt(j)) % 360;
+  return ['hsl(' + h + ',58%,42%)', 'hsl(' + h + ',62%,16%)'];
+}
+function idOf(a){ return a.packageName || a.label; }
+function byId(id){ for (var i = 0; i < apps.length; i++) if (idOf(apps[i]) === id) return apps[i]; return null; }
+
+function iconEl(a){
+  var d = document.createElement('div'); d.className = 'icon';
+  var mono = function(){ d.textContent = (a.label || '?').trim().charAt(0).toUpperCase(); };
+  var src = a.icon || a.iconBase64 || '';
+  if (typeof src === 'string' && src.length > 20 && !/^(data:|https?:)/.test(src)) src = 'data:image/png;base64,' + src.replace(/\s/g, '');
+  if (typeof src === 'string' && src){
+    var img = new Image(); img.alt = ''; img.src = src; img.onerror = function(){ d.innerHTML = ''; mono(); };
+    d.appendChild(img);
+  } else mono();
+  return d;
+}
+function btn(a, cls){
+  var b = document.createElement('button'), c = colorsFor(a);
+  b.className = cls; b.dataset.f = idOf(a); b.dataset.c = c[0];
+  if (cls === 'fav'){ b.style.setProperty('--c1', c[0]); b.style.setProperty('--c2', c[1]); }
+  var l = document.createElement('div'); l.className = 'label'; l.textContent = a.label || a.packageName;
+  b.appendChild(iconEl(a)); b.appendChild(l);
+  if (cls === 'tile' && favs.indexOf(idOf(a)) > -1){
+    var s = document.createElement('span'); s.className = 'star'; s.textContent = '★'; b.appendChild(s);
+  }
+  return b;
+}
+
+function render(){
+  var row = $('row'), grid = $('grid');
+  row.innerHTML = ''; grid.innerHTML = '';
+  var n = 0;
+  favs.forEach(function(id){ var a = byId(id); if (a){ row.appendChild(btn(a, 'fav')); n++; } });
+  if (!n){
+    var e = document.createElement('div'); e.className = 'empty';
+    e.textContent = 'Nothing pinned yet. Open Apps and hold OK on an app to pin it here.';
+    row.appendChild(e);
+  }
+  var rl = $('rail'), rec = recentList(); rl.innerHTML = '';
+  $('secB').textContent = rec.length ? 'Recently opened' : 'More apps';
+  (rec.length ? rec : apps.filter(function(a){ return favs.indexOf(idOf(a)) < 0; }).slice(0, 8))
+    .forEach(function(a){ rl.appendChild(btn(a, 'rec')); });
+  var sorted = apps.slice().sort(function(a, b){ return (a.label || '').localeCompare(b.label || ''); });
+  sorted.forEach(function(a){ grid.appendChild(btn(a, 'tile')); });
+  $('count').textContent = apps.length + ' apps. Hold OK on an app to pin or unpin it on Home.';
+}
+
+function setView(v){
+  if (v === view) return;
+  view = v; document.body.dataset.view = v;
+  [].forEach.call(document.querySelectorAll('.view'), function(el){ el.classList.toggle('on', el.id === 'v-' + v); });
+  [].forEach.call(document.querySelectorAll('.tab'), function(el){ el.classList.toggle('on', el.dataset.v === v); });
+}
+function focusFirst(){
+  var el = document.querySelector('.view.on .movie-btn')
+        || document.querySelector('.view.on [data-f]')
+        || document.querySelector('.tab.on');
+  if (el) el.focus({ preventScroll: true });
+}
+
+var toastT;
+function toast(t){ var el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function(){ el.classList.remove('on'); }, 1800); }
+function toggleFav(id){
+  var i = favs.indexOf(id), nextId = id;
+  if (i > -1){
+    favs.splice(i, 1); toast('Removed from Home');
+    if (view === 'home') nextId = favs[Math.min(i, favs.length - 1)];
+  } else { favs.push(id); toast('Pinned to Home'); }
+  save(); render();
+  var next = nextId && document.querySelector('.view.on [data-f="' + (window.CSS && CSS.escape ? CSS.escape(nextId) : nextId) + '"]');
+  if (next) next.focus({ preventScroll: true }); else focusFirst();
+}
+
+function launch(id){
+  var a = byId(id), b = window.Android;
+  if (!a) return;
+
+  if (a.url){
+    if (b && typeof b.launchUrl === 'function'){
+      b.launchUrl(a.url);
+    } else {
+      window.open(a.url, '_blank');
+    }
+    return;
+  }
+
+  if (!b || typeof b.launchApp !== 'function'){
+    toast('Open inside the launcher app to start apps');
+    return;
+  }
+
+  try{
+    var r = recents[id] || { n: 0, t: 0 }; r.n++; r.t = Date.now(); recents[id] = r;
+    localStorage.setItem('recent.v1', JSON.stringify(recents));
+  }catch(e){}
+  try{ b.launchApp(a.packageName || '', a.activityName || ''); }catch(e){ console.warn('[Launcher]', e); }
+}
+
+function focusables(){ return [].slice.call(document.querySelectorAll('.tab, .view.on [data-f], .view.on .movie-btn, .view.on .movie-hero')); }
+function move(dir){
+  var cur = document.activeElement, list = focusables();
+  if (list.indexOf(cur) < 0){ focusFirst(); return; }
+  var a = cur.getBoundingClientRect(), ax = a.left + a.width / 2, ay = a.top + a.height / 2, best = null, bs = 1e9;
+  list.forEach(function(el){
+    if (el === cur) return;
+    var r = el.getBoundingClientRect(), dx = r.left + r.width / 2 - ax, dy = r.top + r.height / 2 - ay, s;
+    if (dir === 'left' || dir === 'right'){
+      if ((dir === 'left' ? dx : -dx) >= -4 || Math.abs(dy) > a.height * .6) return;
+      s = Math.abs(dx) + Math.abs(dy) * 3;
+    } else {
+      if ((dir === 'up' ? dy : -dy) >= -4) return;
+      s = Math.abs(dy) + Math.abs(dx) * 3;
+    }
+    if (s < bs){ bs = s; best = el; }
+  });
+  if (best){
+    best.focus({ preventScroll: true });
+    if (best.scrollIntoView) best.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+}
+function center(el){
+  var p = el.parentNode;
+  if (p.id === 'grid') p.scrollTo({ top: el.offsetTop - (p.clientHeight - el.offsetHeight) / 2, behavior: 'smooth' });
+  else if (p.classList.contains('hs')) p.scrollTo({ left: el.offsetLeft - (p.clientWidth - el.offsetWidth) / 2, behavior: 'smooth' });
+}
+var DEF_TINT = '#2a4fd6';
+document.addEventListener('focusin', function(e){
+  var el = e.target;
+  if (el.dataset && el.dataset.f){
+    $('glow').style.backgroundColor = el.dataset.c; center(el);
+  } else if (el.classList && el.classList.contains('tab')){
+    $('glow').style.backgroundColor = DEF_TINT; setView(el.dataset.v);
+  } else if (el.classList && el.classList.contains('movie-btn')){
+    $('glow').style.backgroundColor = DEF_TINT;
+  }
+});
+
+var KEYS = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' };
+var ok = function(e){ return e.key === 'Enter' || e.keyCode === 23 || e.key === 'Select'; };
+var back = function(e){ return e.key === 'Escape' || e.key === 'Backspace' || e.key === 'GoBack' || e.keyCode === 4; };
+var lp, fired = false, t0 = 0, hint = null;
+var HOLD_MS = 450;
+
+document.addEventListener('keydown', function(e){
+  if (KEYS[e.key]){ e.preventDefault(); move(KEYS[e.key]); return; }
+  if (ok(e)){
+    e.preventDefault(); if (e.repeat) return;
+    var el = document.activeElement; fired = false; clearTimeout(lp); clearTimeout(hint);
+    t0 = Date.now();
+    if (el && el.dataset && el.dataset.f){
+      lp = setTimeout(function(){ fired = true; toggleFav(el.dataset.f); }, HOLD_MS);
+      hint = setTimeout(function(){ if (!fired) toast('Keep holding OK to pin'); }, 260);
+    }
+  } else if (back(e)){
+    e.preventDefault();
+    if (view !== 'home'){ setView('home'); focusFirst(); }
+  }
+});
+document.addEventListener('keyup', function(e){
+  if (!ok(e)) return;
+  e.preventDefault(); clearTimeout(lp); clearTimeout(hint);
+  if (fired){ fired = false; return; }
+  var el = document.activeElement;
+  if (!el) return;
+  if (t0 && (Date.now() - t0) >= HOLD_MS && el.dataset && el.dataset.f){ t0 = 0; toggleFav(el.dataset.f); return; }
+  t0 = 0;
+  if (el.classList && el.classList.contains('movie-btn')){ el.click(); return; }
+  if (el.dataset && el.dataset.f) launch(el.dataset.f);
+});
+document.addEventListener('click', function(e){
+  var t = e.target.closest ? e.target.closest('[data-f],.tab') : null;
+  if (!t) return;
+  if (t.dataset.f) launch(t.dataset.f); else setView(t.dataset.v);
+});
+
+document.addEventListener('visibilitychange', function(){
+  if (document.hidden) return;
+  var f = document.activeElement, id = f && f.dataset && f.dataset.f;
+  render();
+  if (!moviePool.length) loadMovies();
+  var n = id && document.querySelector('.view.on [data-f="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
+  if (n) n.focus({ preventScroll: true }); else focusFirst();
+});
+
+function tick(){
+  var n = new Date(), t = n.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  $('mini').textContent = t;
+  $('date').textContent = n.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+  setTimeout(tick, 1000 - n.getMilliseconds());
+}
+tick();
+
+function sys(){
+  var on = navigator.onLine;
+  $('dNet').className = 'dot' + (on ? '' : ' off'); $('tNet').textContent = on ? 'Online' : 'Offline';
+  var dpr = window.devicePixelRatio || 1;
+  var w = Math.round(screen.width * dpr), h = Math.round(screen.height * dpr);
+  $('tTv').textContent = w + '×' + h; $('res').textContent = w >= 3000 ? '4K' : h >= 1000 ? '1080p' : '720p';
+  var b = window.Android;
+  function flag(m, dot, txt, yes, no){
+    var r = b && typeof b[m] === 'function' ? String(b[m]()).toLowerCase() : '';
+    if (r === 'true' || r === '1'){ $(dot).className = 'dot'; $(txt).textContent = yes; }
+    else if (r === 'false' || r === '0'){ $(dot).className = 'dot off'; $(txt).textContent = no; }
+  }
+  try{ flag('getAdbEnabled', 'dAdb', 'tAdb', 'Enabled', 'Disabled'); flag('isDefaultLauncher', 'dMode', 'tMode', 'Yes', 'No'); }catch(e){}
+  try{ if (b && typeof b.getTvInfo === 'function') $('tTv').textContent = b.getTvInfo(); }catch(e){}
+}
+window.addEventListener('online', sys); window.addEventListener('offline', sys);
+
+function wIcon(c){ return c === 0 ? '☀️' : c < 3 ? '⛅' : c < 4 ? '☁️' : c < 50 ? '🌫️' : c < 60 ? '🌦️' : c < 70 ? '🌧️' : c < 80 ? '🌨️' : c < 90 ? '🌦️' : '⛈️'; }
+function wText(c){ return c === 0 ? 'Clear' : c < 3 ? 'Partly cloudy' : c < 4 ? 'Overcast' : c < 50 ? 'Fog' : c < 60 ? 'Drizzle' : c < 70 ? 'Rain' : c < 80 ? 'Snow' : c < 90 ? 'Showers' : 'Thunderstorm'; }
+function json(u){ return fetch(u, { cache: 'no-store' }).then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); }); }
+function coords(){
+  var fallback = { lat: CONFIG.FALLBACK_LAT, lon: CONFIG.FALLBACK_LON };
+  if (!CONFIG.WEATHER_LOCATION) return Promise.resolve(fallback);
+  return json('https://geocoding-api.open-meteo.com/v1/search?count=1&format=json&name=' + encodeURIComponent(CONFIG.WEATHER_LOCATION))
+    .then(function(d){ return d.results && d.results[0] ? { lat: d.results[0].latitude, lon: d.results[0].longitude } : fallback; });
+}
+function weather(){
+  coords().then(function(c){
+    return json('https://api.open-meteo.com/v1/forecast?latitude=' + c.lat + '&longitude=' + c.lon +
+      '&current=temperature_2m,apparent_temperature,weather_code&timezone=auto&temperature_unit=' + CONFIG.WEATHER_UNITS);
+  }).then(function(d){
+    var c = d.current, u = CONFIG.WEATHER_UNITS === 'fahrenheit' ? '°F' : '°C';
+    $('wx').textContent = wIcon(c.weather_code) + ' ' + Math.round(c.temperature_2m) + u; $('wx').title = wText(c.weather_code);
+  }).catch(function(e){ console.warn('[Weather]', e); $('wx').textContent = ''; })
+    .then(function(){ setTimeout(weather, CONFIG.WEATHER_REFRESH_MS); });
+}
+
+/* ── Movie Hero with Smooth Crossfade ── */
+var moviePool = [], currentMovie = null, movieIndex = -1;
+var activeBg = 1;
+
+function movieImage(path){
+  return path ? 'https://image.tmdb.org/t/p/w780' + path : '';
+}
+
+function showMovie(movie){
+  if (!movie) return;
+  currentMovie = movie;
+
+  var copy = document.querySelector('.movie-copy');
+  
+  // 1. Fade out text
+  copy.style.opacity = '0';
+  copy.style.transform = 'translateY(10px)';
+
+  // 2. Crossfade background
+  var url = movieImage(movie.backdrop_path);
+  var nextBg = activeBg === 1 ? $('heroBg2') : $('heroBg1');
+  var curBg = activeBg === 1 ? $('heroBg1') : $('heroBg2');
+
+  nextBg.style.backgroundImage = url ? 'url("' + url + '")' : 'radial-gradient(ellipse at 75% 40%,#263752,#090b12 75%)';
+  void nextBg.offsetWidth; // Force reflow
+  nextBg.classList.add('active');
+  curBg.classList.remove('active');
+  activeBg = activeBg === 1 ? 2 : 1;
+
+  // 3. Swap text halfway through the fade
+  setTimeout(function(){
+    $('movieTitle').textContent = movie.title || movie.name || 'Discover a movie';
+    var date = (movie.release_date || movie.first_air_date || '').slice(0, 4);
+    var rating = Number(movie.vote_average);
+    $('movieMeta').textContent = [
+      date,
+      Number.isFinite(rating) && rating > 0 ? '★ ' + rating.toFixed(1) + '/10' : '',
+      movie.original_language ? movie.original_language.toUpperCase() : ''
+    ].filter(Boolean).join('  ·  ');
+    $('movieOverview').textContent = movie.overview || 'Discover your next favorite movie.';
+
+    // 4. Fade text back in
+    copy.style.opacity = '1';
+    copy.style.transform = 'translateY(0)';
+  }, 250);
+}
+
+function nextMovie(){
+  if (!moviePool.length) return;
+  if (moviePool.length === 1){ showMovie(moviePool[0]); return; }
+  var next = movieIndex;
+  while (next === movieIndex) next = Math.floor(Math.random() * moviePool.length);
+  movieIndex = next;
+  showMovie(moviePool[movieIndex]);
+}
+
+function loadMovies(){
+  var b = window.Android;
+  if (!b || typeof b.getTrendingMovies !== 'function') return;
+  try{
+    var raw = b.getTrendingMovies();
+    var data = raw ? JSON.parse(raw) : null;
+    moviePool = ((data && data.results) || []).filter(function(m){ return m && m.backdrop_path; });
+    if (moviePool.length){
+      movieIndex = -1;
+      nextMovie();
+    } else {
+      console.warn('[Movies] empty pool — set tmdbApiKey in MainActivity.kt');
+    }
+  }catch(e){
+    console.warn('[Movies]', e);
+    $('movieTitle').textContent = 'Your next movie awaits';
+    $('movieMeta').textContent = 'Recommendations temporarily unavailable';
+  }
+}
+
+function openHeroTrailer(){
+  if (!currentMovie || !window.Android || typeof window.Android.openTrailer !== 'function') return;
+  try{ window.Android.openTrailer(String(currentMovie.id)); }catch(e){ console.warn('[Movies]', e); }
+}
+$('nextMovie').addEventListener('click', function(e){ e.stopPropagation(); nextMovie(); });
+$('movieHero').addEventListener('click', openHeroTrailer);
+$('movieHero').addEventListener('keyup', function(e){ if (e.target === $('movieHero') && ok(e)) openHeroTrailer(); });
+
+function demo(){
+  return ['YouTube','Netflix','HBO Max','Prime Video','Disney+','Spotify','Plex','Kodi','Twitch','Chrome','Photos','Settings']
+    .map(function(l){ return { label: l, packageName: 'demo.' + l.toLowerCase().replace(/\W/g, '') }; });
+}
+function pickDefaults(){
+  var out = [];
+  CONFIG.DEFAULT_FAVORITES.forEach(function(d){
+    for (var i = 0; i < apps.length; i++){
+      if (d.label.test(apps[i].label || '') || d.pkg.test(apps[i].packageName || '')){ out.push(idOf(apps[i])); return; }
+    }
+  });
+  return out;
+}
+function boot(){
+  var b = window.Android;
+  try{
+    apps = b && typeof b.listApps === 'function' ? JSON.parse(b.listApps()) : demo();
+  }catch(e){ console.warn('[Launcher] listApps failed', e); apps = []; }
+  apps = (apps || []).filter(function(a){ return a && (a.label || a.packageName); });
+
+  if (CONFIG.VIRTUAL_APPS){
+    apps = apps.concat(CONFIG.VIRTUAL_APPS);
+  }
+
+  favs = load();
+  if (!Array.isArray(favs)){ favs = pickDefaults(); save(); }
+  render(); sys(); focusFirst();
+  if ('requestIdleCallback' in window){
+    requestIdleCallback(weather, { timeout: 3000 });
+    requestIdleCallback(loadMovies, { timeout: 3000 });
+  } else {
+    setTimeout(weather, 1500);
+    setTimeout(loadMovies, 1200);
+  }
+}
+boot();
+})();
+</script>
+</body>
+</html>

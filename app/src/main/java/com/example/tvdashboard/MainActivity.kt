@@ -45,11 +45,15 @@ class MainActivity : Activity() {
         WebView.setWebContentsDebuggingEnabled(true)
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
-        webView.settings.cacheMode = WebSettings.LOAD_NO_CACHE
+        webView.settings.cacheMode = WebSettings.LOAD_DEFAULT
         webView.settings.mediaPlaybackRequiresUserGesture = false
+        webView.settings.allowFileAccess = true
+        webView.settings.allowContentAccess = true
+        webView.settings.allowFileAccessFromFileURLs = true
+        webView.settings.allowUniversalAccessFromFileURLs = true
         webView.webViewClient = WebViewClient()
         webView.addJavascriptInterface(WebAppInterface(), "Android")
-        webView.loadUrl("http://192.168.1.70:8080")
+        webView.loadUrl("file:///android_asset/index.html")
         setContentView(webView)
     }
 
