@@ -1,0 +1,2 @@
+com/example/tvdashboard/BuildConfig.java
+ com.example.tvdashboard.BuildConfig

@@ -1,0 +1,99 @@
+-- Merging decision tree log ---
+manifest
+ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:2:1-38:12
+INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:2:1-38:12
+INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:2:1-38:12
+INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:2:1-38:12
+INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:2:1-38:12
+INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:2:1-38:12
+INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:2:1-38:12
+	package
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:3:5-38
+		INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+		INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+	android:versionName
+		INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:2:1-38:12
+		INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+	android:versionCode
+		INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:2:1-38:12
+		INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:2:11-69
+uses-permission#android.permission.INTERNET
+ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:5:5-67
+	android:name
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:5:22-64
+uses-feature#android.software.leanback
+ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:7:5-86
+	android:required
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:7:60-83
+	android:name
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:7:19-59
+uses-feature#android.hardware.touchscreen
+ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:8:5-90
+	android:required
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:8:63-87
+	android:name
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:8:19-62
+queries
+ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:10:5-15:15
+intent#action:name:android.intent.action.MAIN+category:name:android.intent.category.LEANBACK_LAUNCHER
+ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:11:9-14:18
+action#android.intent.action.MAIN
+ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:12:13-65
+	android:name
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:12:21-62
+category#android.intent.category.LEANBACK_LAUNCHER
+ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:13:13-82
+	android:name
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:13:23-79
+application
+ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:17:5-37:19
+	android:supportsRtl
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:20:9-35
+	android:label
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:19:9-37
+	android:allowBackup
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:18:9-35
+	android:theme
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:21:9-67
+	android:usesCleartextTraffic
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:22:9-44
+activity#com.example.tvdashboard.MainActivity
+ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:24:9-36:20
+	android:screenOrientation
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:28:13-50
+	android:launchMode
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:27:13-44
+	android:exported
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:26:13-36
+	android:configChanges
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:29:13-94
+	android:name
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:25:13-41
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.DEFAULT+category:name:android.intent.category.HOME+category:name:android.intent.category.LEANBACK_LAUNCHER
+ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:30:13-35:29
+category#android.intent.category.HOME
+ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:32:17-73
+	android:name
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:32:27-70
+category#android.intent.category.DEFAULT
+ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:33:17-76
+	android:name
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml:33:27-73
+uses-sdk
+INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+		INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+		ADDED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+		INJECTED from D:\TVDashboardApp\app\src\main\AndroidManifest.xml

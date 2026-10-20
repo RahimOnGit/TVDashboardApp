@@ -1,0 +1,89 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.example.tvdashboard"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="29"
+8-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+9        android:targetSdkVersion="30" />
+9-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:5:5-67
+11-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:5:22-64
+12
+13    <uses-feature
+13-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:7:5-86
+14        android:name="android.software.leanback"
+14-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:7:19-59
+15        android:required="true" />
+15-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:7:60-83
+16    <uses-feature
+16-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:8:5-90
+17        android:name="android.hardware.touchscreen"
+17-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:8:19-62
+18        android:required="false" />
+18-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:8:63-87
+19
+20    <queries>
+20-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:10:5-15:15
+21        <intent>
+21-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:11:9-14:18
+22            <action android:name="android.intent.action.MAIN" />
+22-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:12:13-65
+22-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:12:21-62
+23
+24            <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+24-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:13:13-82
+24-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:13:23-79
+25        </intent>
+26    </queries>
+27
+28    <application
+28-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:17:5-37:19
+29        android:allowBackup="true"
+29-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:18:9-35
+30        android:debuggable="true"
+31        android:extractNativeLibs="false"
+32        android:label="TV Dashboard"
+32-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:19:9-37
+33        android:supportsRtl="true"
+33-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:20:9-35
+34        android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+34-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:21:9-67
+35        android:usesCleartextTraffic="true" >
+35-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:22:9-44
+36        <activity
+36-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:24:9-36:20
+37            android:name="com.example.tvdashboard.MainActivity"
+37-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:25:13-41
+38            android:configChanges="orientation|screenSize|keyboardHidden|keyboard|navigation"
+38-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:29:13-94
+39            android:exported="true"
+39-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:26:13-36
+40            android:launchMode="singleTask"
+40-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:27:13-44
+41            android:screenOrientation="landscape" >
+41-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:28:13-50
+42            <intent-filter>
+42-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:30:13-35:29
+43                <action android:name="android.intent.action.MAIN" />
+43-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:12:13-65
+43-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:12:21-62
+44
+45                <category android:name="android.intent.category.HOME" />
+45-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:32:17-73
+45-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:32:27-70
+46                <category android:name="android.intent.category.DEFAULT" />
+46-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:33:17-76
+46-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:33:27-73
+47                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+47-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:13:13-82
+47-->D:\TVDashboardApp\app\src\main\AndroidManifest.xml:13:23-79
+48            </intent-filter>
+49        </activity>
+50    </application>
+51
+52</manifest>
